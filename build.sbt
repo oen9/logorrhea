@@ -2,14 +2,14 @@ val app = crossProject.in(file(".")).settings(
   unmanagedSourceDirectories in Compile += baseDirectory.value  / "shared" / "main" / "scala",
   libraryDependencies ++= Seq(
     "com.lihaoyi" %%% "scalatags" % "0.6.5",
-    "com.lihaoyi" %%% "upickle" % "0.4.4",
-    "com.lihaoyi" %%% "autowire" % "0.2.6"
+    "com.lihaoyi" %%% "upickle" % "0.4.4"
   ),
   scalaVersion := "2.12.2",
   name := "logorrhea"
 ).jsSettings(
   libraryDependencies ++= Seq(
-    "org.scala-js" %%% "scalajs-dom" % "0.9.1"
+    "org.scala-js" %%% "scalajs-dom" % "0.9.1",
+    "be.doeraene" %%% "scalajs-jquery" % "0.9.1"
   )
 ).jvmSettings(
   libraryDependencies ++= Seq(
@@ -17,8 +17,31 @@ val app = crossProject.in(file(".")).settings(
   )
 )
 
+lazy val fastOptJSDev = TaskKey[Unit]("fastOptJSDev")
 lazy val appJS = app.js
+  .disablePlugins(RevolverPlugin)
+  .enablePlugins(WorkbenchPlugin)
+  .settings(
+    fastOptJSDev := {
+      val targetRes = "../target/scala-2.12/classes/"
+      IO.copyDirectory((resourceDirectory in Compile).value, new File(baseDirectory.value, targetRes))
+
+      val fastOptFrom = (fastOptJS in Compile).value.data
+      val fastOptTo = new File(baseDirectory.value, targetRes + fastOptFrom.name)
+      IO.copyFile(fastOptFrom, fastOptTo)
+    }
+//    ,(fastOptJS in Compile) := { // moving fastopt.js to classes/front-res/js/fastopt.js
+//      val src =  (fastOptJS in Compile).value.data
+//      val dest = crossTarget.value / "classes" / "front-res" / "js" / src.name
+//      IO.move(src, dest)
+//      Attributed.blank(dest)
+//    }
+  )
+
 lazy val appJVM = app.jvm.settings(
   (resources in Compile) += (fastOptJS in (appJS, Compile)).value.data,
-  target := baseDirectory.value / "../target"
+  (unmanagedResourceDirectories in Compile) += (resourceDirectory in (appJS, Compile)).value,
+  target := baseDirectory.value / ".." / "target"
 ).enablePlugins(JavaAppPackaging)
+
+disablePlugins(RevolverPlugin)
