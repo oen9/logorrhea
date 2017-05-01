@@ -23,12 +23,21 @@ lazy val appJS = app.js
   .enablePlugins(WorkbenchPlugin)
   .settings(
     fastOptJSDev := {
+
+      // resources
       val targetRes = "../target/scala-2.12/classes/"
       IO.copyDirectory((resourceDirectory in Compile).value, new File(baseDirectory.value, targetRes))
 
+      // logorrhea-fastopt.js
       val fastOptFrom = (fastOptJS in Compile).value.data
       val fastOptTo = new File(baseDirectory.value, targetRes + fastOptFrom.name)
       IO.copyFile(fastOptFrom, fastOptTo)
+
+      // logorrhea-fastopt.js.map
+      val mapFileName = fastOptFrom.name + ".map"
+      val fastOptMapFrom = fastOptFrom.getParentFile / mapFileName
+      val fastOptMapTo = new File(baseDirectory.value, targetRes + mapFileName)
+      IO.copyFile(fastOptMapFrom, fastOptMapTo)
     }
 //    ,(fastOptJS in Compile) := { // moving fastopt.js to classes/front-res/js/fastopt.js
 //      val src =  (fastOptJS in Compile).value.data

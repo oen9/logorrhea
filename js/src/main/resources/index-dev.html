@@ -1,62 +1,28 @@
 <!DOCTYPE html>
 <html>
-    <head>
-      <title>logorrhea</title>
-      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-        <link href="front-res/css/materialize.css" type="text/css" rel="stylesheet" media="screen,projection"/>
-        <link href="front-res/css/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    </head>
-    <body onload="oen.main(document.getElementById('mainDiv'));">
-        <header>
-            <ul id="dropdown1" class="dropdown-content">
-                <li><a href="#!">Close room</a></li>
-                <li><a href="#!">About</a></li>
-                <li class="divider"></li>
-                <li><a href="#!">Logout</a></li>
-            </ul>
+<head>
+    <title>logorrhea</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="front-res/css/materialize.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+    <link href="front-res/css/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body onload="oen.logorrhea.main(
+    document.getElementById('header'),
+    document.getElementById('main'),
+    document.getElementById('footer'));">
 
-            <nav>
-                <div class="nav-wrapper">
-                    <a href="#" class="brand-logo">logorrhea</a>
-                    <ul id="nav-mobile" class="right ">
-                        <li><a class="dropdown-button" href="#!" data-activates="dropdown1"><i class="material-icons right">settings</i></a></li>
-                    </ul>
-                </div>
-            </nav>
-        </header>
+<header id="header"></header>
 
-        <main class="lighten-1">
-            <div id="modal1" class="modal">
-                <div class="modal-content">
-                    <h4>Please enter your name</h4>
-                    <input type="text" placeholder="your nickname">
-                </div>
+<main id="main"></main>
 
-                <div class="modal-footer">
-                    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Connect</a>
-                </div>
-            </div>
+<footer id="footer" class="page-footer"></footer>
 
-            <br>
-            <div id="mainDiv"></div>
-        </main>
+<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="front-res/js/materialize.js"></script>
 
-        <footer class="page-footer">
-            <div class="footer-copyright">
-                <div class="container">
-                    © 2017 oen
-                    <a class="grey-text text-lighten-4 right" target="_blank" href="https://github.com/oen9/logorrhea">github</a>
-                </div>
-            </div>
-        </footer>
-
-      <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-      <script src="front-res/js/materialize.js"></script>
-      <script src="front-res/js/init.js"></script>
-
-      <script type="text/javascript" src="/logorrhea-fastopt.js"></script>
-      <script type="text/javascript" src="http://localhost:12345/workbench.js"></script>
-    </body>
+<script type="text/javascript" src="/logorrhea-fastopt.js"></script>
+<script type="text/javascript" src="http://localhost:12345/workbench.js"></script>
+</body>
 </html>

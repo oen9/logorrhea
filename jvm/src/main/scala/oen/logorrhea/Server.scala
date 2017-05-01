@@ -1,4 +1,4 @@
-package simple
+package oen.logorrhea
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
@@ -21,8 +21,11 @@ object Server {
         pathPrefix("front-res") {
           getFromResourceDirectory("front-res")
         } ~
-        pathPrefix("logorrhea-fastopt.js") {
+        path("logorrhea-fastopt.js") {
           getFromResource("logorrhea-fastopt.js")
+        } ~
+        path("logorrhea-fastopt.js.map") {
+          getFromResource("logorrhea-fastopt.js.map")
         }
       }
     }

@@ -1,8 +1,9 @@
 .icon-block {
-  padding: 0 15px;
+    padding: 0 15px;
 }
+
 .icon-block .material-icons {
-	font-size: inherit;
+    font-size: inherit;
 }
 
 body {
@@ -16,6 +17,15 @@ main {
 }
 
 .scrollable-content {
+    min-height: 65vh;
     max-height: 65vh;
     overflow: auto;
+}
+
+.page-footer {
+    padding-top: 0;
+}
+
+.page-footer .footer-copyright {
+    min-height: 0;
 }
