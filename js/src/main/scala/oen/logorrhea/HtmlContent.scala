@@ -36,24 +36,24 @@ object HtmlContent {
           components.usernameInput
         ),
         div(`class` := "modal-footer",
-          a(`class` := "modal-action modal-close waves-effect waves-green btn-flat", href := "#!" , "Connect")
+          components.connectButton
         )
       ),
       br,
 
       div(`class` := "row",
         div(`class` := "col s12 m4 l2 center",  // rooms
-          div(`class` := "blue lighten-5 scrollable-content",
+          div(`class` := "blue lighten-5",
             components.roomList
           )
         ),
         div(`class` := "col s12 m8 l8 center",  // msg
-          div(`class` := "blue lighten-5 scrollable-content left-align",
+          div(`class` := "blue lighten-5 left-align",
             components.msgList
           )
         ),
         div(`class` := "col s12 m4 l2", // users
-          div(`class` := "blue lighten-5 scrollable-content",
+          div(`class` := "blue lighten-5",
             components.userList
           )
         )
@@ -61,8 +61,9 @@ object HtmlContent {
 
       div(`class` := "row",
         div(`class` := "col s12 m2 l2 center", components.addRoomButton),
-        div(`class` := "col s12 m5 l7 center", components.messageInput),
-        div(`class` := "col s12 m5 l1 center", components.sendMessageButton)
+        div(`class` := "col s12 m1 l1 center", h4(`class` := "blue lighten-2 grey-text text-lighten-4", components.usernameSpan)),
+        div(`class` := "col s12 m5 l6 center", components.messageInput),
+        div(`class` := "col s12 m4 l1 center", components.sendMessageButton)
       )
 
     ).render
