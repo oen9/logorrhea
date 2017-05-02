@@ -48,7 +48,7 @@ lazy val appJS = app.js
   )
 
 lazy val appJVM = app.jvm.settings(
-  (resources in Compile) += (fastOptJS in (appJS, Compile)).value.data,
+  (resources in Compile) += (fullOptJS in (appJS, Compile)).value.data,
   (unmanagedResourceDirectories in Compile) += (resourceDirectory in (appJS, Compile)).value,
   target := baseDirectory.value / ".." / "target"
 ).enablePlugins(JavaAppPackaging)

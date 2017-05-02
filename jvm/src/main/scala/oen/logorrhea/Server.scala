@@ -16,10 +16,16 @@ object Server {
     val route = {
       get {
         pathSingleSlash {
-          getFromResource("index-dev.html")
+          getFromResource("index.html")
+        } ~
+        path("logorrhea-opt.js") {
+          getFromResource("logorrhea-opt.js")
         } ~
         pathPrefix("front-res") {
           getFromResourceDirectory("front-res")
+        } ~
+          path("dev") {
+            getFromResource("index-dev.html")
         } ~
         path("logorrhea-fastopt.js") {
           getFromResource("logorrhea-fastopt.js")
