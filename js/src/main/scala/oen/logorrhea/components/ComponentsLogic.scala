@@ -32,8 +32,6 @@ object ComponentsLogic {
 
       components.msgList.appendChild(prettyMessage)
 
-      println(components.msgList.scrollTop)
-      println(components.msgList.scrollHeight)
       components.msgList.scrollTop = components.msgList.scrollHeight
 
       components.messageInput.value = ""
