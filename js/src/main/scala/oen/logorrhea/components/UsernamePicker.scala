@@ -1,11 +1,12 @@
 package oen.logorrhea.components
 
-import oen.logorrhea.components.ComponentsLogic.USERNAME_KEY
 import oen.logorrhea.materialize.JQueryHelper
 import org.scalajs.dom
 import org.scalajs.dom.{KeyboardEvent, MouseEvent}
 
 object UsernamePicker {
+
+  final val USERNAME_KEY = "username"
 
   def initPicker(components: ComponentsContainer): Unit = {
     components.connectButton.onclick = (_: MouseEvent) => handleNewUsername(components)
@@ -14,6 +15,7 @@ object UsernamePicker {
     components.signOutButton.onclick = (_: MouseEvent) => {
       dom.window.localStorage.removeItem(USERNAME_KEY)
       components.usernameSpan.innerHTML = ""
+      WebsockConnector.close(components)
       openModalUsernamePicker(components)
     }
 
@@ -29,7 +31,10 @@ object UsernamePicker {
 
   protected def indicateUsername(components: ComponentsContainer, username: String): Unit = {
     components.usernameSpan.innerHTML = username
+    components.mutable.username = Some(username)
     components.messageInput.focus()
+
+    WebsockConnector.connect(components)
   }
 
   protected def handleNewUsername(components: ComponentsContainer): Unit = {
@@ -47,6 +52,6 @@ object UsernamePicker {
   }
 
   protected def handleUsernameNotFound(components: ComponentsContainer): Unit = {
-    if (components.usernameSpan.innerHTML.isEmpty) openModalUsernamePicker(components)
+    if (components.mutable.username.isEmpty) openModalUsernamePicker(components)
   }
 }

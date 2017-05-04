@@ -10,6 +10,7 @@ import akka.stream.OverflowStrategy
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.util.Timeout
 import oen.logorrhea.actors.{UserActor, WebsockDispatcherActor}
+import oen.logorrhea.models.Data
 
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationLong
@@ -68,18 +69,19 @@ trait AppService {
     createdUser.mapTo[ActorRef].map(userActor => {
       val inMsgFlow = Flow[Message]
         .map {
-          case TextMessage.Strict(msgText) => UserActor.UserMessage(msgText)
+          case TextMessage.Strict(msgText) => Data.fromJson(msgText)
           case _ => NotUsed
         }.to(Sink.actorRef(userActor, PoisonPill))
 
-      val outMsgFlow = Source.actorRef[UserActor.OutMsg](Int.MaxValue, OverflowStrategy.dropTail)
+      val outMsgFlow = Source.actorRef[Data](Int.MaxValue, OverflowStrategy.dropTail)
         .mapMaterializedValue(outActor => {
           userActor ! UserActor.WebsockOutput(outActor)
           NotUsed
-        }).map{ case UserActor.OutMsg(msg) => TextMessage(msg) }
+        }).map { data: Data => TextMessage(Data.toJson(data)) }
 
       Flow.fromSinkAndSource(inMsgFlow, outMsgFlow)
     })
   }
+
 
 }

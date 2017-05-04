@@ -1,6 +1,7 @@
 package oen.logorrhea
 
 import oen.logorrhea.components.ComponentsContainer
+import oen.logorrhea.models.Message
 import org.scalajs.dom.html
 
 import scalatags.JsDom.all._
@@ -61,7 +62,7 @@ object HtmlContent {
 
       div(`class` := "row",
         div(`class` := "col s12 m2 l2 center", components.addRoomButton),
-        div(`class` := "col s12 m1 l1 center", h4(`class` := "blue lighten-2 grey-text text-lighten-4", components.usernameSpan)),
+        div(`class` := "col s12 m1 l1 center", h3(`class` := "blue lighten-2 grey-text text-lighten-4", components.usernameSpan)),
         div(`class` := "col s12 m5 l6 center", components.messageInput),
         div(`class` := "col s12 m4 l1 center", components.sendMessageButton)
       )
@@ -75,6 +76,16 @@ object HtmlContent {
         "© 2017 oen",
         a(`class` := "grey-text text-lighten-4 right", target := "_blank", href := "https://github.com/oen9/logorrhea", "github")
       )
+    ).render
+  }
+
+  def createMsg(message: Message, username: String): html.Div = {
+    val from = message.from.get
+    val style = if (from == username) "pink-text" else ""
+
+    div(
+      span(`class` := style, message.from.get, span(": ")),
+      span(`class` := "blue lighten-4", message.msg)
     ).render
   }
 }

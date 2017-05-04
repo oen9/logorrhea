@@ -1,6 +1,6 @@
 package oen.logorrhea.components
 
-import org.scalajs.dom.html
+import org.scalajs.dom.{WebSocket, html}
 
 import scalatags.JsDom.all._
 
@@ -18,5 +18,13 @@ case class ComponentsContainer(
   addRoomButton: html.Anchor = a(`class` := "btn-floating btn waves-effect waver-light", i(`class` := "material-icons", "add")).render,
   usernameSpan: html.Span = span().render,
   messageInput: html.Input = input(`type` := "text", placeholder := "Type here....").render,
-  sendMessageButton: html.Span = span(`class` := "btn waves-effect waves-light", i(`class` := "material-icons", "send")).render
+  sendMessageButton: html.Span = span(`class` := "btn waves-effect waves-light", i(`class` := "material-icons", "send")).render,
+
+  mutable: MutableContainer = new MutableContainer()
+)
+
+class MutableContainer(
+  var username: Option[String] = None,
+  var webSocket: Option[WebSocket] = None,
+  var pingIntervalId: Option[Int] = None
 )
