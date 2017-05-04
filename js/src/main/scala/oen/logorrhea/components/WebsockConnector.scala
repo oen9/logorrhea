@@ -14,7 +14,8 @@ object WebsockConnector {
 
     close(components)
 
-    val uri = "ws://" + dom.window.location.host + "/websock"
+    val protocol = if ("http:" == dom.window.location.protocol) "ws://" else "wss://"
+    val uri = protocol + dom.window.location.host + "/websock"
     val socket = new dom.WebSocket(uri)
 
     components.mutable.webSocket = Some(socket)
