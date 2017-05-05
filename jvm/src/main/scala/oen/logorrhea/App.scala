@@ -16,7 +16,7 @@ object App {
     implicit val system = ActorSystem()
     implicit val materializer = ActorMaterializer()
 
-    val websockDispatcher = system.actorOf(WebsockDispatcherActor.props, "websock-dispatcher")
+    val websockDispatcher = system.actorOf(WebsockDispatcherActor.props, WebsockDispatcherActor.name)
 
     val api = new AppServiceApi(system, websockDispatcher)
 
