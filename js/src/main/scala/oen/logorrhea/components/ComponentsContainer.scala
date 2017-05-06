@@ -1,5 +1,6 @@
 package oen.logorrhea.components
 
+import oen.logorrhea.models.Username
 import org.scalajs.dom.{WebSocket, html}
 
 import scalatags.JsDom.all._
@@ -13,7 +14,7 @@ case class ComponentsContainer(
 
   roomList: html.Div = div(`class` := "scrollable-content").render,
   msgList: html.Div = div(`class` := "scrollable-content").render,
-  userList: html.Div = div(`class` := "scrollable-content").render,
+  userList: html.Div = div(`class` := "scrollable-content center").render,
 
   addRoomButton: html.Anchor = a(`class` := "btn-floating btn waves-effect waver-light", i(`class` := "material-icons", "add")).render,
   usernameSpan: html.Span = span().render,
@@ -26,5 +27,6 @@ case class ComponentsContainer(
 class MutableContainer(
   var username: Option[String] = None,
   var webSocket: Option[WebSocket] = None,
-  var pingIntervalId: Option[Int] = None
+  var pingIntervalId: Option[Int] = None,
+  var users: Set[Username] = Set()
 )

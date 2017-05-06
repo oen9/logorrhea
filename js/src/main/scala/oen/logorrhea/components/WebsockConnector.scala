@@ -3,14 +3,14 @@ package oen.logorrhea.components
 import oen.logorrhea.HtmlContent
 import oen.logorrhea.materialize.Materialize
 import oen.logorrhea.models.Data._
-import oen.logorrhea.models.{Message, Ping, Username}
+import oen.logorrhea.models._
 import org.scalajs.dom
 import org.scalajs.dom._
 
 object WebsockConnector {
 
   def connect(components: ComponentsContainer): Unit = {
-    Materialize.Materialize.toast("Connecting...", 4000)
+    Materialize.Materialize.toast("Connecting...", 2000)
 
     close(components)
 
@@ -21,24 +21,27 @@ object WebsockConnector {
     components.mutable.webSocket = Some(socket)
 
     socket.onopen = (_: Event) => {
-      Materialize.Materialize.toast("Connected!", 4000)
+      Materialize.Materialize.toast("Connected!", 2000)
       components.mutable.username.map(u => toJson(Username(u))).foreach(socket.send)
       components.mutable.pingIntervalId = Some(dom.window.setInterval(() => { socket.send(toJson(Ping)) }, 30000))
     }
 
     socket.onerror = (e: dom.ErrorEvent) => {
-      Materialize.Materialize.toast("Connection error. Disconnected. Error: " + e.message, 4000)
+      Materialize.Materialize.toast("Connection error. Disconnected. Error: " + e.message, 2000)
     }
 
     socket.onclose = (_: CloseEvent) => {
-      Materialize.Materialize.toast("Connection closed.", 4000)
-      Materialize.Materialize.toast("Trying to reconnect in 5 seconds", 4000)
+      Materialize.Materialize.toast("Connection closed.", 2000)
+      Materialize.Materialize.toast("Trying to reconnect in 5 seconds", 2000)
       dom.window.setTimeout(() => connect(components), 5000)
     }
 
     socket.onmessage = (e: dom.MessageEvent) => {
       fromJson(e.data.toString) match {
         case msg: Message => newMessage(msg, components)
+        case userList: UserList => handleUserList(userList, components)
+        case added: UserAdded => handleUserAdded(added, components)
+        case removed: UserRemoved => handleUserRemoved(removed, components)
         case unknown => println("unknown message:" + unknown)
       }
     }
@@ -58,5 +61,20 @@ object WebsockConnector {
 
     components.msgList.appendChild(prettyMessage)
     components.msgList.scrollTop = components.msgList.scrollHeight
+  }
+
+  protected def handleUserList(userList: UserList, components: ComponentsContainer): Unit = {
+    components.mutable.users = userList.users
+    HtmlContent.refreshUserList(components)
+  }
+
+  protected def handleUserAdded(added: UserAdded, components: ComponentsContainer): Unit = {
+    components.mutable.users = components.mutable.users + added.user
+    HtmlContent.refreshUserList(components)
+  }
+
+  protected def handleUserRemoved(removed: UserRemoved, components: ComponentsContainer): Unit = {
+    components.mutable.users = components.mutable.users - removed.user
+    HtmlContent.refreshUserList(components)
   }
 }

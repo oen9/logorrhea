@@ -1,7 +1,7 @@
 package oen.logorrhea
 
 import oen.logorrhea.components.ComponentsContainer
-import oen.logorrhea.models.Message
+import oen.logorrhea.models.{Message, Username}
 import org.scalajs.dom.html
 
 import scalatags.JsDom.all._
@@ -62,7 +62,7 @@ object HtmlContent {
 
       div(`class` := "row",
         div(`class` := "col s12 m2 l2 center", components.addRoomButton),
-        div(`class` := "col s12 m1 l1 center", h3(`class` := "blue lighten-2 grey-text text-lighten-4", components.usernameSpan)),
+        div(`class` := "col s12 m1 l1 center", h3(`class` := "purple btn-large", components.usernameSpan)),
         div(`class` := "col s12 m5 l6 center", components.messageInput),
         div(`class` := "col s12 m4 l1 center", components.sendMessageButton)
       )
@@ -86,6 +86,21 @@ object HtmlContent {
     div(
       span(`class` := style, message.from.get, span(": ")),
       span(`class` := "blue lighten-4", message.msg)
+    ).render
+  }
+
+  def refreshUserList(components: ComponentsContainer): Unit = {
+    components.userList.innerHTML = ""
+
+    components.mutable.users
+      .toSeq.sorted((u1: Username, u2: Username) => JsUtils.localeCompare(u1.username, u2.username))
+      .map(styleUserlistElement)
+      .foreach(d => components.userList.appendChild(d))
+  }
+
+  protected def styleUserlistElement(username: Username): html.Div = {
+    div(`class` := "row",
+      div(`class` := "center-align btn blue", username.username)
     ).render
   }
 }
