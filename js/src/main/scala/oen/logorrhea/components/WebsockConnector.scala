@@ -39,6 +39,7 @@ object WebsockConnector {
     socket.onmessage = (e: dom.MessageEvent) => {
       fromJson(e.data.toString) match {
         case msg: Message => newMessage(msg, components)
+        case msgs: Messages => msgs.messages.foreach(newMessage(_, components))
         case userList: UserList => handleUserList(userList, components)
         case added: UserAdded => handleUserAdded(added, components)
         case removed: UserRemoved => handleUserRemoved(removed, components)

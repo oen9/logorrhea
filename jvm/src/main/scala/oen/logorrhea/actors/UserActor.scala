@@ -1,10 +1,14 @@
 package oen.logorrhea.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import oen.logorrhea.actors.RoomActor.Join
+import oen.logorrhea.actors.RoomsActor.{GetStartRoom, RoomRef}
 import oen.logorrhea.actors.UserActor.WebsockOutput
 import oen.logorrhea.models._
 
-class UserActor(userListActor: ActorRef) extends Actor with ActorLogging {
+class UserActor(userListActor: ActorRef, roomsActor: ActorRef) extends Actor with ActorLogging {
+
+  var currentRoom: Option[RoomRef] = None
 
   override def receive: Receive = emptyActor
 
@@ -16,27 +20,32 @@ class UserActor(userListActor: ActorRef) extends Actor with ActorLogging {
     case u: Username =>
       context.become(handlingMessages(out, u.username))
 
-      context.system.eventStream.subscribe(self, classOf[Message])
       context.system.eventStream.subscribe(self, classOf[UserAdded])
       context.system.eventStream.subscribe(self, classOf[UserRemoved])
+      context.system.eventStream.subscribe(self, classOf[RoomCreated])
 
       userListActor ! UserListActor.GetUsers
       userListActor ! UserAdded(u)
+      roomsActor ! GetStartRoom
   }
 
   def handlingMessages(out: ActorRef, username: String): Receive = {
     case inMsg @ Message(_, _, None) =>
-      context.system.eventStream.publish(inMsg.copy(from = Some(username)))
+      currentRoom.foreach(_.ref ! inMsg.copy(from = Some(username)))
 
-    case outMsg: Message => out ! outMsg
-    case added: UserAdded => out ! added
-    case removed: UserRemoved => out ! removed
-    case ul: UserList => out ! ul
+    case roomRef: RoomRef =>
+      roomRef.ref ! Join
+      currentRoom = Some(roomRef)
+      out ! roomRef.room
+
+    case Ping =>
+
+    case toForward => out ! toForward
   }
 }
 
 object UserActor {
-  def props(userListActor: ActorRef) = Props(new UserActor(userListActor))
+  def props(userListActor: ActorRef, roomsActor: ActorRef) = Props(new UserActor(userListActor, roomsActor))
 
   case class WebsockOutput(out: ActorRef)
 }

@@ -81,7 +81,7 @@ object HtmlContent {
 
   def createMsg(message: Message, username: String): html.Div = {
     val from = message.from.get
-    val style = if (from == username) "pink-text" else ""
+    val style = if (from == username) "pink-text" else "green-text"
 
     div(
       span(`class` := style, message.from.get, span(": ")),

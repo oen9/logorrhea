@@ -1,16 +1,18 @@
 package oen.logorrhea.actors
 
-import akka.actor.{Actor, ActorLogging, Props, Terminated}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props, Terminated}
 import oen.logorrhea.actors.WebsockDispatcherActor.CreateUser
 
 class WebsockDispatcherActor extends Actor with ActorLogging {
 
-  val userListActor = context.actorOf(UserListActor.props, UserListActor.name)
+  val userListActor: ActorRef = context.actorOf(UserListActor.props, UserListActor.name)
   context.watch(userListActor)
+
+  val roomsActor: ActorRef = context.actorOf(RoomsActor.props)
 
   override def receive: Receive = {
     case CreateUser =>
-      val createdUser = context.actorOf(UserActor.props(userListActor))
+      val createdUser = context.actorOf(UserActor.props(userListActor, roomsActor))
       context.watch(createdUser)
       sender() ! createdUser
 
