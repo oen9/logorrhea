@@ -15,4 +15,12 @@ object JQueryHelper {
   def closeUsernameModal(): Unit = {
     jquery.jQuery("#user-name-modal").asInstanceOf[ModalOperations].modal("close")
   }
+
+  def openNewRoomModal(): Unit = {
+    jquery.jQuery("#new-room-modal").asInstanceOf[ModalOperations].modal("open")
+  }
+
+  def closeNewRoomModal(): Unit = {
+    jquery.jQuery("#new-room-modal").asInstanceOf[ModalOperations].modal("close")
+  }
 }

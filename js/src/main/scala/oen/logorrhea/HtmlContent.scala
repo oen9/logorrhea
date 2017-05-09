@@ -1,8 +1,8 @@
 package oen.logorrhea
 
-import oen.logorrhea.components.ComponentsContainer
-import oen.logorrhea.models.{Message, Username}
-import org.scalajs.dom.html
+import oen.logorrhea.components.{ComponentsContainer, WebsockConnector}
+import oen.logorrhea.models.{Message, Room, Username}
+import org.scalajs.dom.{MouseEvent, html}
 
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags2
@@ -33,27 +33,37 @@ object HtmlContent {
     div(
       div(`class` := "modal", id := "user-name-modal",
         div(`class` := "modal-content",
-          h4("Please enter yoru name"),
+          h4("Please enter your name"),
           components.usernameInput
         ),
         div(`class` := "modal-footer",
           components.connectButton
         )
       ),
+      div(`class` := "modal", id := "new-room-modal",
+        div(`class` := "modal-content",
+          h4("Please enter new room name"),
+          components.newRoomInput
+        ),
+        div(`class` := "modal-footer",
+          components.newRoomAccept,
+          span(`class` := "modal-action waves-effect waves-green btn-flat modal-close red", "cancel").render
+        )
+      ),
       br,
 
       div(`class` := "row",
-        div(`class` := "col s12 m4 l2 center",  // rooms
+        div(`class` := "col s2 m2 l2 center",  // rooms
           div(`class` := "blue lighten-5",
             components.roomList
           )
         ),
-        div(`class` := "col s12 m8 l8 center",  // msg
+        div(`class` := "col s8 m8 l8 center",  // msg
           div(`class` := "blue lighten-5 left-align",
             components.msgList
           )
         ),
-        div(`class` := "col s12 m4 l2", // users
+        div(`class` := "col s2 m2 l2", // users
           div(`class` := "blue lighten-5",
             components.userList
           )
@@ -61,10 +71,9 @@ object HtmlContent {
       ),
 
       div(`class` := "row",
-        div(`class` := "col s12 m2 l2 center", components.addRoomButton),
-        div(`class` := "col s12 m1 l1 center", h3(`class` := "purple btn-large", components.usernameSpan)),
-        div(`class` := "col s12 m5 l6 center", components.messageInput),
-        div(`class` := "col s12 m4 l1 center", components.sendMessageButton)
+        div(`class` := "col s2 m2 l2 center", components.addRoomButton),
+        div(`class` := "col s7 m7 l7 center", components.messageInput),
+        div(`class` := "col s1 m1 l1 center", components.sendMessageButton)
       )
 
     ).render
@@ -94,13 +103,35 @@ object HtmlContent {
 
     components.mutable.users
       .toSeq.sorted((u1: Username, u2: Username) => JsUtils.localeCompare(u1.username, u2.username))
-      .map(styleUserlistElement)
+      .map(u => createUserListElement(u, components))
       .foreach(d => components.userList.appendChild(d))
   }
 
-  protected def styleUserlistElement(username: Username): html.Div = {
+  protected def createUserListElement(username: Username, components: ComponentsContainer): html.Div = {
+    val color = components.mutable.username.filter(_ == username.username).map(_ => "green").getOrElse("indigo")
+
     div(`class` := "row",
-      div(`class` := "center-align btn blue", username.username)
+      div(`class` := s"center-align btn $color", username.username)
+    ).render
+  }
+
+  def refreshRoomList(components: ComponentsContainer): Unit = {
+    components.roomList.innerHTML = ""
+
+    components.mutable.rooms
+      .toSeq.sorted((r1: Room, r2: Room) => JsUtils.localeCompare(r1.name, r2.name))
+      .map(r => createRoomListElement(r, components))
+      .foreach(r => components.roomList.appendChild(r))
+  }
+
+  protected def createRoomListElement(room: Room, components: ComponentsContainer): html.Div = {
+    val color = components.mutable.currentRoom.filter(_.name == room.name).map(_ => "green").getOrElse("indigo")
+    val button = div(`class` := s"center-align btn $color waves-effect waves-light", room.name).render
+
+    button.onclick = (_: MouseEvent) => { WebsockConnector.send(room, components) }
+
+    div(`class` := "row",
+      button
     ).render
   }
 }

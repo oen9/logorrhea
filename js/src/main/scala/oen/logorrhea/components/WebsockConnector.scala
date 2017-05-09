@@ -39,22 +39,42 @@ object WebsockConnector {
     socket.onmessage = (e: dom.MessageEvent) => {
       fromJson(e.data.toString) match {
         case msg: Message => newMessage(msg, components)
-        case msgs: Messages => msgs.messages.foreach(newMessage(_, components))
+        case msgs: Messages => fillMessages(msgs, components)
         case userList: UserList => handleUserList(userList, components)
         case added: UserAdded => handleUserAdded(added, components)
         case removed: UserRemoved => handleUserRemoved(removed, components)
+        case roomList: RoomList => handleRooms(roomList, components)
+        case roomCreated: RoomCreated => handleRoomCreated(roomCreated, components)
+        case room: Room => components.mutable.currentRoom = Some(room)
         case unknown => println("unknown message:" + unknown)
       }
     }
   }
 
+  def send(msg: Data, components: ComponentsContainer): Unit = {
+    components.mutable.webSocket.foreach(_.send(toJson(msg)))
+  }
+
   def send(msg: String, components: ComponentsContainer): Unit = {
-    components.mutable.webSocket.foreach(_.send(toJson(Message(msg))))
+    for {
+      ws <- components.mutable.webSocket
+      room <- components.mutable.currentRoom
+    } ws.send(toJson(Message(msg, room.name)))
+  }
+
+  def createRoom(roomName: String, components: ComponentsContainer): Unit = {
+    components.mutable.webSocket.foreach(_.send(toJson(CreateRoom(roomName))))
   }
 
   def close(components: ComponentsContainer): Unit = {
     components.mutable.webSocket.foreach(_.close())
     components.mutable.pingIntervalId.foreach(dom.window.clearInterval)
+  }
+
+  protected def fillMessages(messages: Messages, components: ComponentsContainer): Unit = {
+    components.msgList.innerHTML = ""
+    messages.messages.foreach(newMessage(_, components))
+    HtmlContent.refreshRoomList(components)
   }
 
   protected def newMessage(message: Message, components: ComponentsContainer): Unit = {
@@ -77,5 +97,15 @@ object WebsockConnector {
   protected def handleUserRemoved(removed: UserRemoved, components: ComponentsContainer): Unit = {
     components.mutable.users = components.mutable.users - removed.user
     HtmlContent.refreshUserList(components)
+  }
+
+  protected def handleRooms(roomList: RoomList, components: ComponentsContainer): Unit = {
+    components.mutable.rooms = roomList.rooms
+    HtmlContent.refreshRoomList(components)
+  }
+
+  protected def handleRoomCreated(roomCreated: RoomCreated, components: ComponentsContainer): Unit = {
+    components.mutable.rooms = components.mutable.rooms + roomCreated.room
+    HtmlContent.refreshRoomList(components)
   }
 }

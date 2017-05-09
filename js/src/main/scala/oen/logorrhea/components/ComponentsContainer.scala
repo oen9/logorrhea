@@ -1,13 +1,16 @@
 package oen.logorrhea.components
 
-import oen.logorrhea.models.Username
+import oen.logorrhea.models.{Room, Username}
 import org.scalajs.dom.{WebSocket, html}
 
 import scalatags.JsDom.all._
 
 case class ComponentsContainer(
   usernameInput: html.Input = input(`type` := "text", placeholder := "Your username").render,
-  connectButton: html.Span = span(`class` := "modal-action waves-effect waves-green btn-flat", "connect").render,
+  connectButton: html.Span = span(`class` := "modal-action waves-effect waves-green btn-flat green", "connect").render,
+
+  newRoomInput: html.Input = input(`type` := "text", placeholder := "room name").render,
+  newRoomAccept: html.Span = span(`class` := "modal-action waves-effect waves-green btn-flat green modal-close", "accept").render,
 
   aboutButton: html.Span = span("about").render,
   signOutButton: html.Span = span("Sign out").render,
@@ -28,5 +31,7 @@ class MutableContainer(
   var username: Option[String] = None,
   var webSocket: Option[WebSocket] = None,
   var pingIntervalId: Option[Int] = None,
-  var users: Set[Username] = Set()
+  var users: Set[Username] = Set(),
+  var rooms: Set[Room] = Set(),
+  var currentRoom: Option[Room] = None
 )

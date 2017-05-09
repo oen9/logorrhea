@@ -1,8 +1,8 @@
 package oen.logorrhea.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import oen.logorrhea.actors.RoomActor.Join
-import oen.logorrhea.actors.RoomsActor.{GetStartRoom, RoomRef}
+import oen.logorrhea.actors.RoomActor.{Join, Quit}
+import oen.logorrhea.actors.RoomsActor.{GetRoom, GetStartRoom, RoomRef}
 import oen.logorrhea.actors.UserActor.WebsockOutput
 import oen.logorrhea.models._
 
@@ -37,6 +37,13 @@ class UserActor(userListActor: ActorRef, roomsActor: ActorRef) extends Actor wit
       roomRef.ref ! Join
       currentRoom = Some(roomRef)
       out ! roomRef.room
+
+    case createRoom: CreateRoom =>
+      roomsActor ! createRoom
+
+    case Room(name) =>
+      currentRoom.foreach(_.ref ! Quit)
+      roomsActor ! GetRoom(name)
 
     case Ping =>
 
