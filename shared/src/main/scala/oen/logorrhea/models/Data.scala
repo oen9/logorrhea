@@ -12,6 +12,7 @@ sealed trait Data
 @key("use-list") case class UserList(users: Set[Username]) extends Data
 @key("user-added") case class UserAdded(user: Username) extends Data
 @key("user-removed") case class UserRemoved(user: Username) extends Data
+@key("user-rejected") case object UserRejected extends Data
 
 @key("room") case class Room(name: String) extends Data
 @key("room-list") case class RoomList(rooms: Set[Room]) extends Data

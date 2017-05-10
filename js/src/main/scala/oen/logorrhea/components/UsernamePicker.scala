@@ -13,14 +13,18 @@ object UsernamePicker {
     components.usernameInput.onkeydown = (e: KeyboardEvent) => if ("Enter" == e.key) handleNewUsername(components)
 
     components.signOutButton.onclick = (_: MouseEvent) => {
-      dom.window.localStorage.removeItem(USERNAME_KEY)
-      components.usernameSpan.innerHTML = ""
-      WebsockConnector.close(components)
-      openModalUsernamePicker(components)
+      signOut(components)
     }
 
     restoreUsername(components)
     handleUsernameNotFound(components)
+  }
+
+  def signOut(components: ComponentsContainer): Unit = {
+    dom.window.localStorage.removeItem(USERNAME_KEY)
+    components.usernameSpan.innerHTML = ""
+    WebsockConnector.close(components)
+    openModalUsernamePicker(components)
   }
 
   protected def restoreUsername(components: ComponentsContainer): Unit = {
@@ -32,7 +36,6 @@ object UsernamePicker {
   protected def indicateUsername(components: ComponentsContainer, username: String): Unit = {
     components.usernameSpan.innerHTML = username
     components.mutable.username = Some(username)
-    components.messageInput.focus()
 
     WebsockConnector.connect(components)
   }
@@ -41,13 +44,13 @@ object UsernamePicker {
     val newUsername = components.usernameInput.value
     if (!newUsername.isEmpty) {
       dom.window.localStorage.setItem(USERNAME_KEY, newUsername)
-      JQueryHelper.closeUsernameModal()
       indicateUsername(components, newUsername)
     }
   }
 
   protected def openModalUsernamePicker(components: ComponentsContainer): Unit = {
     JQueryHelper.openUsernameModal()
+    components.usernameInput.value = components.mutable.username.getOrElse("")
     components.usernameInput.focus()
   }
 

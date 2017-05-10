@@ -10,6 +10,7 @@ case class ComponentsContainer(
   connectButton: html.Span = span(`class` := "modal-action waves-effect waves-green btn-flat green", "connect").render,
 
   newRoomInput: html.Input = input(`type` := "text", placeholder := "room name").render,
+  newRoomNotification: html.Span = span(`class` := "red lighten-3").render,
   newRoomAccept: html.Span = span(`class` := "modal-action waves-effect waves-green btn-flat green modal-close", "accept").render,
 
   aboutButton: html.Span = span("about").render,

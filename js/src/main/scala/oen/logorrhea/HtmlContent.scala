@@ -34,6 +34,7 @@ object HtmlContent {
       div(`class` := "modal", id := "user-name-modal",
         div(`class` := "modal-content",
           h4("Please enter your name"),
+          components.newRoomNotification,
           components.usernameInput
         ),
         div(`class` := "modal-footer",
@@ -133,5 +134,14 @@ object HtmlContent {
     div(`class` := "row",
       button
     ).render
+  }
+
+  def clearNotifications(components: ComponentsContainer): Unit = {
+    components.newRoomNotification.innerHTML = ""
+  }
+
+  def activeUserRejectedNotification(components: ComponentsContainer): Unit = {
+    components.newRoomNotification.innerHTML = ""
+    components.newRoomNotification.appendChild(span("Username in use. Please choose again").render)
   }
 }

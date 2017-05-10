@@ -1,7 +1,7 @@
 package oen.logorrhea.components
 
 import oen.logorrhea.HtmlContent
-import oen.logorrhea.materialize.Materialize
+import oen.logorrhea.materialize.{JQueryHelper, Materialize}
 import oen.logorrhea.models.Data._
 import oen.logorrhea.models._
 import org.scalajs.dom
@@ -40,12 +40,18 @@ object WebsockConnector {
       fromJson(e.data.toString) match {
         case msg: Message => newMessage(msg, components)
         case msgs: Messages => fillMessages(msgs, components)
-        case userList: UserList => handleUserList(userList, components)
+
+        case userList: UserList =>
+          initUsernameAccepted(components)
+          handleUserList(userList, components)
         case added: UserAdded => handleUserAdded(added, components)
         case removed: UserRemoved => handleUserRemoved(removed, components)
+        case UserRejected => handleUserRejected(components)
+
         case roomList: RoomList => handleRooms(roomList, components)
         case roomCreated: RoomCreated => handleRoomCreated(roomCreated, components)
         case room: Room => components.mutable.currentRoom = Some(room)
+
         case unknown => println("unknown message:" + unknown)
       }
     }
@@ -84,6 +90,12 @@ object WebsockConnector {
     components.msgList.scrollTop = components.msgList.scrollHeight
   }
 
+  protected def initUsernameAccepted(components: ComponentsContainer): Unit = {
+    HtmlContent.clearNotifications(components)
+    JQueryHelper.closeUsernameModal()
+    components.messageInput.focus()
+  }
+
   protected def handleUserList(userList: UserList, components: ComponentsContainer): Unit = {
     components.mutable.users = userList.users
     HtmlContent.refreshUserList(components)
@@ -107,5 +119,10 @@ object WebsockConnector {
   protected def handleRoomCreated(roomCreated: RoomCreated, components: ComponentsContainer): Unit = {
     components.mutable.rooms = components.mutable.rooms + roomCreated.room
     HtmlContent.refreshRoomList(components)
+  }
+
+  protected def handleUserRejected(components: ComponentsContainer): Unit = {
+    HtmlContent.activeUserRejectedNotification(components)
+    UsernamePicker.signOut(components)
   }
 }

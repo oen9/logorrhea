@@ -1,19 +1,26 @@
 package oen.logorrhea.actors
 
 import akka.actor.{Actor, ActorRef, Props, Terminated}
-import oen.logorrhea.actors.UserListActor.GetUsers
-import oen.logorrhea.models.{UserAdded, UserList, UserRemoved, Username}
+import oen.logorrhea.actors.UserListActor.{GetUsers, UserAccepted}
+import oen.logorrhea.models._
 
 class UserListActor extends Actor {
 
   var users: Set[(ActorRef, Username)] = Set[(ActorRef, Username)] ()
 
   override def receive: Receive = {
-    case  added: UserAdded =>
-      context.system.eventStream.publish(added)
-      users = users + ((sender(), added.user))
+    case added: UserAdded =>
+      if (users.exists(u => u._2.username.equalsIgnoreCase(added.user.username))) {
+        sender() ! UserRejected
 
-      context.watch(sender())
+      } else {
+        context.system.eventStream.publish(added)
+        users = users + ((sender(), added.user))
+
+        context.watch(sender())
+
+        sender() ! UserAccepted(added.user)
+      }
 
     case removed: UserRemoved  =>
       context.system.eventStream.publish(removed)
@@ -34,5 +41,6 @@ object UserListActor {
   def props = Props(new UserListActor)
   val name: String = "user-list"
 
+  case class UserAccepted(username: Username)
   case object GetUsers
 }

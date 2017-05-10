@@ -4,6 +4,7 @@ import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import oen.logorrhea.actors.RoomActor.{Join, Quit}
 import oen.logorrhea.actors.RoomsActor.{GetRoom, GetStartRoom, RoomRef}
 import oen.logorrhea.actors.UserActor.WebsockOutput
+import oen.logorrhea.actors.UserListActor.UserAccepted
 import oen.logorrhea.models._
 
 class UserActor(userListActor: ActorRef, roomsActor: ActorRef) extends Actor with ActorLogging {
@@ -18,6 +19,12 @@ class UserActor(userListActor: ActorRef, roomsActor: ActorRef) extends Actor wit
 
   def waitingForUsername(out: ActorRef): Receive = {
     case u: Username =>
+      userListActor ! UserAdded(u)
+
+    case UserRejected =>
+      out ! UserRejected
+
+    case UserAccepted(u) =>
       context.become(handlingMessages(out, u.username))
 
       context.system.eventStream.subscribe(self, classOf[UserAdded])
@@ -25,7 +32,6 @@ class UserActor(userListActor: ActorRef, roomsActor: ActorRef) extends Actor wit
       context.system.eventStream.subscribe(self, classOf[RoomCreated])
 
       userListActor ! UserListActor.GetUsers
-      userListActor ! UserAdded(u)
       roomsActor ! GetStartRoom
   }
 
@@ -47,7 +53,7 @@ class UserActor(userListActor: ActorRef, roomsActor: ActorRef) extends Actor wit
 
     case Ping =>
 
-    case toForward => out ! toForward
+    case toForward: Data => out ! toForward
   }
 }
 
