@@ -73,8 +73,12 @@ object WebsockConnector {
   }
 
   def close(components: ComponentsContainer): Unit = {
-    components.mutable.webSocket.foreach(_.close())
+    components.mutable.webSocket.foreach(ws => {
+      ws.onclose = (e: CloseEvent) => {}
+      ws.close()
+    })
     components.mutable.pingIntervalId.foreach(dom.window.clearInterval)
+    components.mutable.pingIntervalId = None
   }
 
   protected def fillMessages(messages: Messages, components: ComponentsContainer): Unit = {
