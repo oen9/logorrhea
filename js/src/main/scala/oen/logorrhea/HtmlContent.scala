@@ -95,7 +95,7 @@ object HtmlContent {
 
     div(
       span(`class` := style, message.from.get, span(": ")),
-      span(`class` := "blue lighten-4", message.msg)
+      span(`class` := "blue lighten-4", EmoteProcessor.process(message.msg))
     ).render
   }
 

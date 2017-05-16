@@ -29,3 +29,7 @@ main {
 .page-footer .footer-copyright {
     min-height: 0;
 }
+
+.emote {
+    vertical-align: middle;
+}
