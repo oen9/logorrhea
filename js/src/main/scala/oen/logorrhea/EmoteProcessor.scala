@@ -1,8 +1,9 @@
 package oen.logorrhea
 
+import oen.logorrhea.components.ComponentsContainer
 import org.scalajs.dom
-import org.scalajs.dom.html
-import org.scalajs.dom.html.Image
+import org.scalajs.dom.{MouseEvent, html}
+import org.scalajs.dom.html.{Image, UList}
 import org.scalajs.dom.raw.HTMLElement
 
 import scalatags.JsDom.TypedTag
@@ -42,15 +43,33 @@ object EmoteProcessor {
     span(fullMsg).render
   }
 
+  def genEmoteList(components: ComponentsContainer): TypedTag[UList] = {
+    ul(`class` := "dropdown-content", id := "emote-dropdown",
+      EMOTE_DICT
+        .grouped(3)
+        .map(g => li(g.map(e => genEmoteListElement(e, components)).toList))
+        .toList
+    )
+  }
+
+  protected def genEmoteListElement(emote: (String, String), components: ComponentsContainer): Image = {
+    val element = emoteIdToHtmlImg(emote._1, emote._2, 100).render
+    element.onclick = (_: MouseEvent) => {
+      components.messageInput.value += s" ${emote._1} "
+      components.messageInput.focus()
+    }
+    element
+  }
+
   protected def emoteTextToSpan(text: String): TypedTag[HTMLElement] = {
     EMOTE_DICT
       .get(text)
-      .map(emoteIdToHtmlImg)
+      .map(id => emoteIdToHtmlImg(text, id, 25))
       .getOrElse(span(text))
   }
 
-  protected def emoteIdToHtmlImg(id: String): TypedTag[Image] = {
-    val imgSrc = s"${dom.window.location.origin}/front-res/emotes/e${id}_25.gif"
-    img(`class` := "emote", src := imgSrc)
+  protected def emoteIdToHtmlImg(emoteText: String, emoteId: String, size: Int): TypedTag[Image] = {
+    val imgSrc = s"${dom.window.location.origin}/front-res/emotes/e${emoteId}_$size.gif"
+    img(`class` := "emote tooltipped", src := imgSrc, attr("data-tooltip") := emoteText)
   }
 }

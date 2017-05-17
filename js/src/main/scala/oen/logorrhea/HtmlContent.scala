@@ -71,10 +71,14 @@ object HtmlContent {
         )
       ),
 
+      EmoteProcessor.genEmoteList(components),
       div(`class` := "row",
         div(`class` := "col s2 m2 l2 center", components.addRoomButton),
         div(`class` := "col s7 m7 l7 center", components.messageInput),
-        div(`class` := "col s1 m1 l1 center", components.sendMessageButton)
+        div(`class` := "col s1 m1 l1 center",
+          components.sendMessageButton,
+          a(`class` := "emote-dropdown", href := "#", attr("data-activates") := "emote-dropdown", i(`class` := "material-icons right", "dialpad"))
+        )
       )
 
     ).render

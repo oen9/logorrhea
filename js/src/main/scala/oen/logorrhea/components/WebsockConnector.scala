@@ -92,6 +92,7 @@ object WebsockConnector {
 
     components.msgList.appendChild(prettyMessage)
     components.msgList.scrollTop = components.msgList.scrollHeight
+    JQueryHelper.refreshTooltips()
   }
 
   protected def initUsernameAccepted(components: ComponentsContainer): Unit = {
