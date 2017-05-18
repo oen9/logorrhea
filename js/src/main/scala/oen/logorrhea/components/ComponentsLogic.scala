@@ -22,10 +22,7 @@ object ComponentsLogic {
   protected def newRoom(components: ComponentsContainer): Unit = {
     val newRoomName = components.newRoomInput.value
     if (!newRoomName .isEmpty) {
-      WebsockConnector.createRoom(components.newRoomInput.value, components)
-      components.newRoomInput.value = ""
-      components.messageInput.focus()
-      JQueryHelper.closeNewRoomModal()
+      WebsockConnector.createRoom(newRoomName, components)
     }
   }
 

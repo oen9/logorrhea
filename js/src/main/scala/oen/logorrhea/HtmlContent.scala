@@ -34,7 +34,7 @@ object HtmlContent {
       div(`class` := "modal", id := "user-name-modal",
         div(`class` := "modal-content",
           h4("Please enter your name"),
-          components.newRoomNotification,
+          components.usernameNotification,
           components.usernameInput
         ),
         div(`class` := "modal-footer",
@@ -44,6 +44,7 @@ object HtmlContent {
       div(`class` := "modal", id := "new-room-modal",
         div(`class` := "modal-content",
           h4("Please enter new room name"),
+          components.newRoomNotification,
           components.newRoomInput
         ),
         div(`class` := "modal-footer",
@@ -141,11 +142,17 @@ object HtmlContent {
   }
 
   def clearNotifications(components: ComponentsContainer): Unit = {
+    components.usernameNotification.innerHTML = ""
     components.newRoomNotification.innerHTML = ""
   }
 
   def activeUserRejectedNotification(components: ComponentsContainer): Unit = {
+    components.usernameNotification.innerHTML = ""
+    components.usernameNotification.appendChild(span("Username in use. Please choose again").render)
+  }
+
+  def newRoomRejectedNotification(components: ComponentsContainer): Unit = {
     components.newRoomNotification.innerHTML = ""
-    components.newRoomNotification.appendChild(span("Username in use. Please choose again").render)
+    components.newRoomNotification.appendChild(span("Room exists. Please choose again").render)
   }
 }

@@ -2,7 +2,7 @@ package oen.logorrhea.actors
 
 import akka.actor.{Actor, ActorRef, Props}
 import oen.logorrhea.actors.RoomsActor._
-import oen.logorrhea.models.{CreateRoom, Room, RoomCreated, RoomList}
+import oen.logorrhea.models._
 
 class RoomsActor extends Actor {
 
@@ -12,10 +12,17 @@ class RoomsActor extends Actor {
   override def receive: Receive = {
 
     case CreateRoom(name) =>
-      val roomActor = context.actorOf(RoomActor.props(name))
-      val roomRef = RoomRef(roomActor, Room(name))
-      rooms = rooms + roomRef
-      context.system.eventStream.publish(RoomCreated(roomRef.room))
+      if (rooms.exists(_.room.name.equalsIgnoreCase(name))) {
+        sender() ! RoomRejected
+
+      } else {
+        sender() ! RoomAccepted(name)
+
+        val roomActor = context.actorOf(RoomActor.props(name))
+        val roomRef = RoomRef(roomActor, Room(name))
+        rooms = rooms + roomRef
+        context.system.eventStream.publish(RoomCreated(roomRef.room))
+      }
 
     case GetRoom(roomName) =>
       rooms.find(roomRef => roomRef.room.name == roomName).foreach(sender() ! _)

@@ -51,6 +51,8 @@ object WebsockConnector {
         case roomList: RoomList => handleRooms(roomList, components)
         case roomCreated: RoomCreated => handleRoomCreated(roomCreated, components)
         case room: Room => components.mutable.currentRoom = Some(room)
+        case RoomRejected => handleRoomRejected(components)
+        case _: RoomAccepted => handleRoomAccepted(components)
 
         case unknown => println("unknown message:" + unknown)
       }
@@ -129,5 +131,16 @@ object WebsockConnector {
   protected def handleUserRejected(components: ComponentsContainer): Unit = {
     HtmlContent.activeUserRejectedNotification(components)
     UsernamePicker.signOut(components)
+  }
+
+  protected def handleRoomRejected(components: ComponentsContainer): Unit = {
+    HtmlContent.newRoomRejectedNotification(components)
+  }
+
+  protected def handleRoomAccepted(components: ComponentsContainer): Unit = {
+    HtmlContent.clearNotifications(components)
+    JQueryHelper.closeNewRoomModal()
+    components.messageInput.focus()
+    components.newRoomInput.value = ""
   }
 }
