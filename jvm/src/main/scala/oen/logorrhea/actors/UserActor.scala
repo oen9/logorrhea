@@ -1,8 +1,8 @@
 package oen.logorrhea.actors
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props, Terminated}
 import oen.logorrhea.actors.RoomActor.{Join, Quit}
-import oen.logorrhea.actors.RoomsActor.{GetRoom, GetStartRoom, RoomRef}
+import oen.logorrhea.actors.RoomsActor.{GetRoom, GetStartRoom, RemoveRoom, RoomRef}
 import oen.logorrhea.actors.UserActor.WebsockOutput
 import oen.logorrhea.actors.UserListActor.UserAccepted
 import oen.logorrhea.models._
@@ -30,6 +30,7 @@ class UserActor(userListActor: ActorRef, roomsActor: ActorRef) extends Actor wit
       context.system.eventStream.subscribe(self, classOf[UserAdded])
       context.system.eventStream.subscribe(self, classOf[UserRemoved])
       context.system.eventStream.subscribe(self, classOf[RoomCreated])
+      context.system.eventStream.subscribe(self, classOf[RoomDeleted])
 
       userListActor ! UserListActor.GetUsers
       roomsActor ! GetStartRoom
@@ -40,8 +41,11 @@ class UserActor(userListActor: ActorRef, roomsActor: ActorRef) extends Actor wit
       currentRoom.foreach(_.ref ! inMsg.copy(from = Some(username)))
 
     case roomRef: RoomRef =>
-      roomRef.ref ! Join
+      currentRoom.foreach(rr => context.unwatch(rr.ref))
+      context.watch(roomRef.ref)
       currentRoom = Some(roomRef)
+
+      roomRef.ref ! Join
       out ! roomRef.room
 
     case createRoom: CreateRoom =>
@@ -51,9 +55,15 @@ class UserActor(userListActor: ActorRef, roomsActor: ActorRef) extends Actor wit
       currentRoom.foreach(_.ref ! Quit)
       roomsActor ! GetRoom(name)
 
+    case DeleteRoom(name) =>
+      roomsActor ! RemoveRoom(name)
+
     case Ping =>
 
     case toForward: Data => out ! toForward
+
+    case Terminated(actorRef) =>
+      currentRoom.filter(_.ref == actorRef).foreach(_ => currentRoom = None)
   }
 }
 

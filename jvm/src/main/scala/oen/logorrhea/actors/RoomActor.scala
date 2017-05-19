@@ -29,6 +29,11 @@ class RoomActor(name: String) extends Actor {
     case GetMessages =>
       sender() ! Messages(messages)
   }
+
+  override def postStop(): Unit = {
+    users.foreach(_ ! Message("Room deleted!", name, Some(name)))
+    super.postStop()
+  }
 }
 
 object RoomActor {

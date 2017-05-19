@@ -13,6 +13,8 @@ case class ComponentsContainer(
   newRoomInput: html.Input = input(`type` := "text", placeholder := "room name").render,
   newRoomNotification: html.Span = span(`class` := "red lighten-3").render,
   newRoomAccept: html.Span = span(`class` := "modal-action waves-effect waves-green btn-flat green", "accept").render,
+  deleteRoomAccept: html.Span = span(`class` := "modal-action waves-effect waves-green btn-flat green", "accept").render,
+  deleteRoomName: html.Span = span(`class` := "red-text").render,
 
   aboutButton: html.Span = span("about").render,
   signOutButton: html.Span = span("Sign out").render,

@@ -50,6 +50,7 @@ object WebsockConnector {
 
         case roomList: RoomList => handleRooms(roomList, components)
         case roomCreated: RoomCreated => handleRoomCreated(roomCreated, components)
+        case roomDeleted: RoomDeleted => handleRoomDeleted(roomDeleted, components)
         case room: Room => components.mutable.currentRoom = Some(room)
         case RoomRejected => handleRoomRejected(components)
         case _: RoomAccepted => handleRoomAccepted(components)
@@ -87,6 +88,7 @@ object WebsockConnector {
     components.msgList.innerHTML = ""
     messages.messages.foreach(newMessage(_, components))
     HtmlContent.refreshRoomList(components)
+    components.messageInput.focus()
   }
 
   protected def newMessage(message: Message, components: ComponentsContainer): Unit = {
@@ -126,6 +128,12 @@ object WebsockConnector {
   protected def handleRoomCreated(roomCreated: RoomCreated, components: ComponentsContainer): Unit = {
     components.mutable.rooms = components.mutable.rooms + roomCreated.room
     HtmlContent.refreshRoomList(components)
+  }
+
+  protected def handleRoomDeleted(roomDeleted: RoomDeleted, components: ComponentsContainer): Unit = {
+    components.mutable.rooms = components.mutable.rooms - roomDeleted.room
+    HtmlContent.refreshRoomList(components)
+    components.messageInput.focus()
   }
 
   protected def handleUserRejected(components: ComponentsContainer): Unit = {

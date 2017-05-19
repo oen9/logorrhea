@@ -17,8 +17,9 @@ sealed trait Data
 @key("room") case class Room(name: String) extends Data
 @key("room-list") case class RoomList(rooms: Set[Room]) extends Data
 @key("create-room") case class CreateRoom(name: String) extends Data
+@key("delete-room") case class DeleteRoom(name: String) extends Data
 @key("room-created") case class RoomCreated(room: Room) extends Data
-@key("room-removed") case class RoomRemoved(name: String) extends Data
+@key("room-deleted") case class RoomDeleted(room: Room) extends Data
 @key("room-rejected") case object RoomRejected extends Data
 @key("room-accepted") case class RoomAccepted(name: String) extends Data
 

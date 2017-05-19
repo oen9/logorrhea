@@ -26,6 +26,14 @@ object JQueryHelper {
     jquery.jQuery("#new-room-modal").asInstanceOf[ModalOperations].modal("close")
   }
 
+  def openDeleteRoomModal: Unit = {
+    jquery.jQuery("#delete-room-modal").asInstanceOf[ModalOperations].modal("open")
+  }
+
+  def closeDeleteRoomModal: Unit = {
+    jquery.jQuery("#delete-room-modal").asInstanceOf[ModalOperations].modal("close")
+  }
+
   def refreshTooltips(): Unit = {
     jquery.jQuery(".tooltipped").asInstanceOf[TooltipsOperations].tooltip(new TooltipsOptions)
   }

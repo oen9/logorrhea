@@ -1,6 +1,7 @@
 package oen.logorrhea
 
 import oen.logorrhea.components.{ComponentsContainer, WebsockConnector}
+import oen.logorrhea.materialize.JQueryHelper
 import oen.logorrhea.models.{Message, Room, Username}
 import org.scalajs.dom.{MouseEvent, html}
 
@@ -49,6 +50,15 @@ object HtmlContent {
         ),
         div(`class` := "modal-footer",
           components.newRoomAccept,
+          span(`class` := "modal-action waves-effect waves-green btn-flat modal-close red", "cancel").render
+        )
+      ),
+      div(`class` := "modal", id := "delete-room-modal",
+        div(`class` := "modal-content",
+          h4(s"You really want to delete ", components.deleteRoomName, "?")
+        ),
+        div(`class` := "modal-footer",
+          components.deleteRoomAccept,
           span(`class` := "modal-action waves-effect waves-green btn-flat modal-close red", "cancel").render
         )
       ),
@@ -132,12 +142,22 @@ object HtmlContent {
 
   protected def createRoomListElement(room: Room, components: ComponentsContainer): html.Div = {
     val color = components.mutable.currentRoom.filter(_.name == room.name).map(_ => "green").getOrElse("indigo")
-    val button = div(`class` := s"center-align btn $color waves-effect waves-light", room.name).render
 
-    button.onclick = (_: MouseEvent) => { WebsockConnector.send(room, components) }
+    val enterButton = div(`class` := s"center-align btn $color waves-effect waves-light", room.name).render
+    enterButton.onclick = (_: MouseEvent) => { WebsockConnector.send(room, components) }
+
+    val deleteButton = if (room.name == SharedStrings.START_ROOM_NAME) span().render else {
+      val dbtn = i(`class` := s"center-align $color waves-effect waves-light material-icons $color-text text-lighten-3", "delete").render
+      dbtn.onclick = (_: MouseEvent) => {
+        components.deleteRoomName.innerHTML = room.name
+        JQueryHelper.openDeleteRoomModal
+      }
+      dbtn
+    }
 
     div(`class` := "row",
-      button
+      enterButton,
+      deleteButton
     ).render
   }
 
