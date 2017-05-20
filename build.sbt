@@ -20,8 +20,14 @@ val app = crossProject.in(file(".")).settings(
     "com.typesafe.akka" %% "akka-stream" % akkaVersion,
     "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
     "com.typesafe.akka" %% "akka-persistence" % akkaVersion,
+
+    "com.github.romix.akka" %% "akka-kryo-serialization" % "0.5.2",
+
     "org.iq80.leveldb" % "leveldb" % "0.7",
     "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8",
+    "com.github.scullxbones" %% "akka-persistence-mongo-casbah" % "1.4.1",
+    "org.mongodb" %% "casbah" % "3.1.1",
+
     "ch.qos.logback" % "logback-classic" % "1.1.3"
   )
 )

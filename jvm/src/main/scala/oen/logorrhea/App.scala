@@ -9,20 +9,22 @@ import oen.logorrhea.actors.WebsockDispatcherActor
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Properties, Success}
 
 object App {
   def main(args: Array[String]): Unit = {
-    implicit val system = ActorSystem()
+
+    val config = ConfigFactory.load(Properties.envOrElse("STAGE", "application"))
+
+    val host = config.getString("http.host")
+    val port = config.getInt("http.port")
+
+    implicit val system = ActorSystem("logorrhea", config)
     implicit val materializer = ActorMaterializer()
 
     val websockDispatcher = system.actorOf(WebsockDispatcherActor.props, WebsockDispatcherActor.name)
 
     val api = new AppServiceApi(system, websockDispatcher)
-
-    val config = ConfigFactory.load()
-    val host = config.getString("http.host")
-    val port = config.getInt("http.port")
 
     val bindingFuture: Future[Http.ServerBinding] = Http().bindAndHandle(api.routes, host, port = port)
 
