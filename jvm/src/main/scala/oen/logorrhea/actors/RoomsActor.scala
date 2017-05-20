@@ -45,10 +45,12 @@ class RoomsActor extends PersistentActor with ActorLogging {
       sender() ! RoomList(rooms.map(_.room))
 
     case RemoveRoom(name) =>
-      rooms.find(_.room.name.equalsIgnoreCase(name))
-        .foreach(_ => {
-          persist(RoomRemoved(name))(_ => removeRoom(name))
-        })
+      if (!name.equalsIgnoreCase(SharedStrings.START_ROOM_NAME)) {
+        rooms.find(_.room.name.equalsIgnoreCase(name))
+          .foreach(_ => {
+            persist(RoomRemoved(name))(_ => removeRoom(name))
+          })
+      }
   }
 
   def createRoom(name: String) = {
