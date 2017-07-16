@@ -7,12 +7,12 @@ import oen.logorrhea.models._
 import org.scalajs.dom
 import org.scalajs.dom._
 
-object WebsockConnector {
+class WebsockConnector(htmlContent: HtmlContent, components: ComponentsContainer, usernamePicker: UsernamePicker) {
 
-  def connect(components: ComponentsContainer): Unit = {
+  def connect(): Unit = {
     Materialize.Materialize.toast("Connecting...", 2000)
 
-    close(components)
+    close()
 
     val protocol = if ("http:" == dom.window.location.protocol) "ws://" else "wss://"
     val uri = protocol + dom.window.location.host + "/websock"
@@ -33,24 +33,24 @@ object WebsockConnector {
     socket.onclose = (_: CloseEvent) => {
       Materialize.Materialize.toast("Connection closed.", 2000)
       Materialize.Materialize.toast("Trying to reconnect in 5 seconds", 2000)
-      dom.window.setTimeout(() => connect(components), 5000)
+      dom.window.setTimeout(() => connect(), 5000)
     }
 
     socket.onmessage = (e: dom.MessageEvent) => {
       fromJson(e.data.toString) match {
-        case msg: Message => newMessage(msg, components)
-        case msgs: Messages => fillMessages(msgs, components)
+        case msg: Message => newMessage(msg)
+        case msgs: Messages => fillMessages(msgs)
 
         case userList: UserList =>
           initUsernameAccepted(components)
-          handleUserList(userList, components)
-        case added: UserAdded => handleUserAdded(added, components)
-        case removed: UserRemoved => handleUserRemoved(removed, components)
+          handleUserList(userList)
+        case added: UserAdded => handleUserAdded(added)
+        case removed: UserRemoved => handleUserRemoved(removed)
         case UserRejected => handleUserRejected(components)
 
-        case roomList: RoomList => handleRooms(roomList, components)
-        case roomCreated: RoomCreated => handleRoomCreated(roomCreated, components)
-        case roomDeleted: RoomDeleted => handleRoomDeleted(roomDeleted, components)
+        case roomList: RoomList => handleRooms(roomList)
+        case roomCreated: RoomCreated => handleRoomCreated(roomCreated)
+        case roomDeleted: RoomDeleted => handleRoomDeleted(roomDeleted)
         case room: Room => components.mutable.currentRoom = Some(room)
         case RoomRejected => handleRoomRejected(components)
         case _: RoomAccepted => handleRoomAccepted(components)
@@ -60,22 +60,22 @@ object WebsockConnector {
     }
   }
 
-  def send(msg: Data, components: ComponentsContainer): Unit = {
+  def send(msg: Data): Unit = {
     components.mutable.webSocket.foreach(_.send(toJson(msg)))
   }
 
-  def send(msg: String, components: ComponentsContainer): Unit = {
+  def send(msg: String): Unit = {
     for {
       ws <- components.mutable.webSocket
       room <- components.mutable.currentRoom
     } ws.send(toJson(Message(msg, room.name)))
   }
 
-  def createRoom(roomName: String, components: ComponentsContainer): Unit = {
+  def createRoom(roomName: String): Unit = {
     components.mutable.webSocket.foreach(_.send(toJson(CreateRoom(roomName))))
   }
 
-  def close(components: ComponentsContainer): Unit = {
+  def close(): Unit = {
     components.mutable.webSocket.foreach(ws => {
       ws.onclose = (e: CloseEvent) => {}
       ws.close()
@@ -84,15 +84,15 @@ object WebsockConnector {
     components.mutable.pingIntervalId = None
   }
 
-  protected def fillMessages(messages: Messages, components: ComponentsContainer): Unit = {
+  protected def fillMessages(messages: Messages): Unit = {
     components.msgList.innerHTML = ""
-    messages.messages.foreach(newMessage(_, components))
-    HtmlContent.refreshRoomList(components)
+    messages.messages.foreach(newMessage)
+    htmlContent.refreshRoomList(send)
     components.messageInput.focus()
   }
 
-  protected def newMessage(message: Message, components: ComponentsContainer): Unit = {
-    val prettyMessage = HtmlContent.createMsg(message, components.mutable.username.get)
+  protected def newMessage(message: Message): Unit = {
+    val prettyMessage = htmlContent.createMsg(message, components.mutable.username.get)
 
     components.msgList.appendChild(prettyMessage)
     components.msgList.scrollTop = components.msgList.scrollHeight
@@ -100,53 +100,53 @@ object WebsockConnector {
   }
 
   protected def initUsernameAccepted(components: ComponentsContainer): Unit = {
-    HtmlContent.clearNotifications(components)
+    htmlContent.clearNotifications()
     JQueryHelper.closeUsernameModal()
     components.messageInput.focus()
   }
 
-  protected def handleUserList(userList: UserList, components: ComponentsContainer): Unit = {
+  protected def handleUserList(userList: UserList): Unit = {
     components.mutable.users = userList.users
-    HtmlContent.refreshUserList(components)
+    htmlContent.refreshUserList()
   }
 
-  protected def handleUserAdded(added: UserAdded, components: ComponentsContainer): Unit = {
+  protected def handleUserAdded(added: UserAdded): Unit = {
     components.mutable.users = components.mutable.users + added.user
-    HtmlContent.refreshUserList(components)
+    htmlContent.refreshUserList()
   }
 
-  protected def handleUserRemoved(removed: UserRemoved, components: ComponentsContainer): Unit = {
+  protected def handleUserRemoved(removed: UserRemoved): Unit = {
     components.mutable.users = components.mutable.users - removed.user
-    HtmlContent.refreshUserList(components)
+    htmlContent.refreshUserList()
   }
 
-  protected def handleRooms(roomList: RoomList, components: ComponentsContainer): Unit = {
+  protected def handleRooms(roomList: RoomList): Unit = {
     components.mutable.rooms = roomList.rooms
-    HtmlContent.refreshRoomList(components)
+    htmlContent.refreshRoomList(send)
   }
 
-  protected def handleRoomCreated(roomCreated: RoomCreated, components: ComponentsContainer): Unit = {
+  protected def handleRoomCreated(roomCreated: RoomCreated): Unit = {
     components.mutable.rooms = components.mutable.rooms + roomCreated.room
-    HtmlContent.refreshRoomList(components)
+    htmlContent.refreshRoomList(send)
   }
 
-  protected def handleRoomDeleted(roomDeleted: RoomDeleted, components: ComponentsContainer): Unit = {
+  protected def handleRoomDeleted(roomDeleted: RoomDeleted): Unit = {
     components.mutable.rooms = components.mutable.rooms - roomDeleted.room
-    HtmlContent.refreshRoomList(components)
+    htmlContent.refreshRoomList(send)
     components.messageInput.focus()
   }
 
   protected def handleUserRejected(components: ComponentsContainer): Unit = {
-    HtmlContent.activeUserRejectedNotification(components)
-    UsernamePicker.signOut(components)
+    htmlContent.activeUserRejectedNotification()
+    usernamePicker.signOut(close)
   }
 
   protected def handleRoomRejected(components: ComponentsContainer): Unit = {
-    HtmlContent.newRoomRejectedNotification(components)
+    htmlContent.newRoomRejectedNotification()
   }
 
   protected def handleRoomAccepted(components: ComponentsContainer): Unit = {
-    HtmlContent.clearNotifications(components)
+    htmlContent.clearNotifications()
     JQueryHelper.closeNewRoomModal()
     components.messageInput.focus()
     components.newRoomInput.value = ""

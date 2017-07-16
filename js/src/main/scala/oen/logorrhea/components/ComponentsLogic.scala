@@ -4,11 +4,9 @@ import oen.logorrhea.materialize.JQueryHelper
 import oen.logorrhea.models.DeleteRoom
 import org.scalajs.dom.{KeyboardEvent, MouseEvent}
 
-object ComponentsLogic {
+class ComponentsLogic(websockConnector: WebsockConnector) {
 
   def initComponentsLogic(components: ComponentsContainer): Unit = {
-    UsernamePicker.initPicker(components)
-
     components.addRoomButton.onclick = (_: MouseEvent) => {
       JQueryHelper.openNewRoomModal()
       components.newRoomInput.focus()
@@ -24,20 +22,20 @@ object ComponentsLogic {
   protected def newRoom(components: ComponentsContainer): Unit = {
     val newRoomName = components.newRoomInput.value
     if (!newRoomName .isEmpty) {
-      WebsockConnector.createRoom(newRoomName, components)
+      websockConnector.createRoom(newRoomName)
     }
   }
 
   protected def deleteRoom(components: ComponentsContainer): Unit = {
     val roomName = components.deleteRoomName.innerHTML
-    WebsockConnector.send(DeleteRoom(roomName), components)
+    websockConnector.send(DeleteRoom(roomName))
     JQueryHelper.closeDeleteRoomModal
   }
 
   protected def sendMsg(components: ComponentsContainer): Unit = {
     val newText = components.messageInput.value
     if (!newText.isEmpty) {
-      WebsockConnector.send(newText, components)
+      websockConnector.send(newText)
       components.messageInput.value = ""
     }
 

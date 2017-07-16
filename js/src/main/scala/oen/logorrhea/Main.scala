@@ -1,6 +1,6 @@
 package oen.logorrhea
 
-import oen.logorrhea.components.{ComponentsContainer, ComponentsLogic}
+import oen.logorrhea.components.{ComponentsContainer, ComponentsLogic, UsernamePicker, WebsockConnector}
 import oen.logorrhea.materialize.JQueryHelper
 import org.scalajs.dom.html
 
@@ -12,17 +12,15 @@ object Main {
   @JSExport
   def main(header: html.Element, main: html.Element, footer: html.Element): Unit = {
     val components = ComponentsContainer()
+    val htmlContent = new HtmlContent(components)
 
-    val headerContent = HtmlContent.initHeader(components)
-    header.appendChild(headerContent)
+    val usernamePicker = new UsernamePicker(components)
+    val websockConnector = new WebsockConnector(htmlContent, components, usernamePicker)
+    val componentsLogic = new ComponentsLogic(websockConnector)
 
-    val mainContent = HtmlContent.initMain(components)
-    main.appendChild(mainContent)
-
-    val footerContent = HtmlContent.initFooter()
-    footer.appendChild(footerContent)
-
+    htmlContent.init(header, main, footer)
     JQueryHelper.initMaterialize()
-    ComponentsLogic.initComponentsLogic(components)
+    componentsLogic.initComponentsLogic(components)
+    usernamePicker.initPicker(websockConnector.connect, websockConnector.close)
   }
 }
